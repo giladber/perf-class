@@ -117,10 +117,14 @@ public class Server implements AutoCloseable {
 				String id = rc.request().getParam("id");
 				UUID uuid = UUID.fromString(id);
 				Optional<Person> optPerson = store.findRecord(uuid);
+
 				optPerson.ifPresent(p -> {
+					String json = Json.encodePrettily(p);
 					rc.response().
 					setStatusCode(200).
-					write(Json.encodePrettily(p)).
+					putHeader("Content-Length", String.valueOf(json.length()) ).
+					putHeader("Content-Type", "application/json").
+					write(json).
 					end();
 				});
 				

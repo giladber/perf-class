@@ -13,7 +13,7 @@ import io.vertx.core.Vertx;
 public class Store
 {
 	private final Collection<Person> records;
-	private final GeospatialProcessor geo = new GeospatialProcessor();
+	private final Geo geo = new Geo();
 	private final Vertx vertx;
 	
 	public Store(Vertx vertx) {

@@ -17,7 +17,7 @@ import static iaf.course.finalex.routes.Routes.*;
 public class Client 
 {
 
-	private static final String BASE_DIR_PATH = "C:\\temp\\perfdata";
+	private static final String BASE_DIR_PATH = "C:\\temp";
 	private static final String HOSTNAME = "localhost";
 	private static final int PORT = 8080;
 	private static final RttRecorder RECORDER = new RttRecorder();
@@ -37,11 +37,8 @@ public class Client
 		
 		LOG.info("Reading directory {}", BASE_DIR_PATH);
 		fs.readDir(BASE_DIR_PATH, resultOfFiles -> {
-			LOG.info("Result of reading directory is {}", resultOfFiles.succeeded());
 			if (resultOfFiles.succeeded()) {
 				resultOfFiles.result().forEach(path -> {
-					
-//					LOG.info("Processing file {}", path);
 					if (!path.endsWith(".json")) return;
 					
 					fs.readFile(path, bufferResult -> {

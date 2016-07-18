@@ -9,7 +9,7 @@ public class RttRecorder implements Runnable, AutoCloseable
 {
 	private static final int MAX_TRACKABLE_LATENCY_SEC = 600; //10 min
 	private static final int MAX_TRACKABLE_LATENCY_MS = MAX_TRACKABLE_LATENCY_SEC * 1000;
-	private static final long PRINT_INTERVAL_MS = 5000;
+	private static final long PRINT_INTERVAL_MS = 60_000;
 	private static final Logger LOG = LogManager.getLogger(RttRecorder.class);
 	
 	private final Histogram histogram = new Histogram(1L, MAX_TRACKABLE_LATENCY_MS, 5);
