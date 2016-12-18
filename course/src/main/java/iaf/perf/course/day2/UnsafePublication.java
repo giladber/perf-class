@@ -2,29 +2,32 @@ package iaf.perf.course.day2;
 
 
 public class UnsafePublication {
+	private static Holder holder;
+	
+	private static final Runnable r1 = () -> {
+		holder = new Holder(1_1);
+	};
+	
+	private static final Runnable r2 = () -> {
+		while (holder == null) {}
+		holder.insanity();
+	};
+	
 	public static void main(String[] args) throws InterruptedException {
-		new UnsafePublication();
+		new Thread(r2).start();
+		new Thread(r1).start();
 	}
 	
-	private final Object obj;
-	
-	public UnsafePublication() throws InterruptedException {
-		final Observer observer = new Observer();
-		observer.addListener(this);
-		obj = new Object();
-		observer.event();
-	}
-	
-	private static final class Observer {
-		Object myObj;
-		public void addListener(UnsafePublication x) {
-			myObj = x.obj;
+	private static final class Holder {
+		private int n;
+		public Holder(int n) {
+			this.n = n;
 		}
 		
-		public void event() {
-			//some time later, and we have no idea why myObj is null! even though it is
-			//final, and x.obj is obviously not null
-			System.out.println(myObj.toString());
+		public void insanity() {
+			if (n != n) {
+				throw new AssertionError("WTF Java?!");
+			}
 		}
 	}
 }
