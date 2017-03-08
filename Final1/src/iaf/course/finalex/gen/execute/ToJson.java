@@ -11,7 +11,7 @@ import iaf.course.finalex.gen.generators.PersonGenerator;
 import iaf.course.finalex.model.Person;
 
 public class ToJson {
-	private static final int AMOUNT = 15_000_000;
+	private static final int AMOUNT = 150_000;
 	private static final PersonGenerator generator = new PersonGenerator();
 
 	public void execute(File directory) 

@@ -9,13 +9,12 @@ import iaf.course.finalex.model.Polygon;
 
 public final class Areas 
 {
-	
-	private static final File TEL_AVIV_JSON = new File("C:\\temp\\areas\\telaviv.json"); 
-	public static final Polygon TEL_AVIV_YA_HABIBI;
+	private static final File TEL_AVIV_JSON = new File("resources/telaviv.json"); 
+	public static final Polygon TEL_AVIV_POLYGON;
 	
 	static {
 		try {
-			TEL_AVIV_YA_HABIBI = new ObjectMapper().readValue(TEL_AVIV_JSON, Polygon.class);
+			TEL_AVIV_POLYGON = new ObjectMapper().readValue(TEL_AVIV_JSON, Polygon.class);
 		} catch (IOException e) {
 			throw new ExceptionInInitializerError(e); //terminate if unable to read coordinates file
 		}
@@ -26,7 +25,7 @@ public final class Areas
 	}
 	
 	private static enum AreaCode {
-		TEL_AVIV(51, TEL_AVIV_YA_HABIBI);
+		TEL_AVIV(51, TEL_AVIV_POLYGON);
 		
 		private AreaCode(int code, Polygon poly) {
 			this.code = code;

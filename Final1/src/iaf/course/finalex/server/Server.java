@@ -60,6 +60,7 @@ public class Server implements AutoCloseable {
 		router.post(ADD_PERSON_URL).blockingHandler(new AddDataHandler());
 		router.get(CLOSE_URL).handler(rc -> handleClose());
 		router.get(GET_PERSON_URL).blockingHandler(new GetDataHandler());
+		router.get(VISITORS_COUNT_URL).blockingHandler(new VisitorCountHandler());
 		
 		httpServer
 			.requestHandler(router::accept)
@@ -89,6 +90,35 @@ public class Server implements AutoCloseable {
 		vertx.close();
 	}
 
+	private final class VisitorCountHandler implements Handler<RoutingContext>
+	{
+
+		@Override
+		public void handle(RoutingContext ctx) {
+			String strCode = ctx.request().getParam("areaCode");
+			try {
+				int areaCode = Integer.valueOf(strCode);
+				long numVisitorsToArea = store.queryVisitorsTo(areaCode);
+				
+				String stringAnswer = String.valueOf(numVisitorsToArea);
+				String numVisitorsLength = String.valueOf(stringAnswer.length()); //good fucking god
+				ctx.response()
+					.setStatusCode(200)
+					.putHeader("Content-Type", "application/text")
+					.putHeader("Content-Length", numVisitorsLength)
+					.write(stringAnswer)
+					.end();
+			} catch (NumberFormatException nfe) {
+				LOG.warn("Received bad input from client. ", nfe);
+				ctx.response().setStatusCode(400).setStatusMessage("Expected integer area code. " + nfe.getMessage()).end();
+			} catch (Exception e) {
+				LOG.error("Error while handling area query", e);
+				ctx.response().setStatusCode(500).setStatusMessage(e.getMessage()).end();
+			}
+		}
+		
+	}
+	
 	private final class AddDataHandler implements Handler<RoutingContext>
 	{
 		@Override

@@ -17,15 +17,37 @@ import static iaf.course.finalex.routes.Routes.*;
 public class Client 
 {
 
-	private static final String BASE_DIR_PATH = "C:\\temp";
-	private static final String HOSTNAME = "localhost";
-	private static final int PORT = 8080;
 	private static final RttRecorder RECORDER = new RttRecorder();
-	
 	private static final Logger LOG = LogManager.getLogger(Client.class);
 
+	private static final class BootstrapData {
+		final String directory;
+		final String hostname;
+		final int port;
+		
+		BootstrapData(String[] args) {
+			try {
+				directory = args[0];
+				hostname = args[1];
+				port = Integer.valueOf(args[2]);
+			} catch (NumberFormatException nfe) {
+				LOG.error("Invalid port: " + args[2] + " , expected a number", nfe);
+				throw new ExceptionInInitializerError(nfe);
+			} catch (Exception e) {
+				LOG.error("Error while initializing Client: " + e);
+				throw new ExceptionInInitializerError(e);
+			}
+
+		}
+	}
 	
 	public static void main(String[] args) {
+		if (args.length < 3) {
+			System.out.println("Usage:  Client.jar <json_source_directory> <hostname> <port>");
+		}
+		
+		BootstrapData data = new BootstrapData(args);
+		
 		Vertx vertx = Vertx.vertx();
 		HttpClient client = vertx.createHttpClient();
 		final FileSystem fs = vertx.fileSystem();
@@ -35,8 +57,8 @@ public class Client
 		ex.submit(RECORDER);
 		final WorkerExecutor executor = vertx.createSharedWorkerExecutor("send-data-pool", 1);
 		
-		LOG.info("Reading directory {}", BASE_DIR_PATH);
-		fs.readDir(BASE_DIR_PATH, resultOfFiles -> {
+		LOG.info("Reading directory {}", data.directory);
+		fs.readDir(data.directory, resultOfFiles -> {
 			if (resultOfFiles.succeeded()) {
 				resultOfFiles.result().forEach(path -> {
 					if (!path.endsWith(".json")) return;
@@ -47,7 +69,7 @@ public class Client
 							String json = new String(bufferResult.result().getBytes());
 							executor.executeBlocking(fut -> {
 								try {
-									sender.send(json, PORT, HOSTNAME, ADD_PERSON_URL, 5000);
+									sender.send(json, data.port, data.hostname, ADD_PERSON_URL, 5000);
 									final long then = System.currentTimeMillis();
 									RECORDER.recordRtt(then - now);
 								} catch (Exception e) {
@@ -55,7 +77,7 @@ public class Client
 								}
 								fut.complete();
 							}, false,
-							result -> {
+							result -> { 
 								if (result.failed()) {
 									result.cause().printStackTrace();
 								}
