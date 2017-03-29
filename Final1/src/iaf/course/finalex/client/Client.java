@@ -1,5 +1,6 @@
 package iaf.course.finalex.client;
 
+import java.io.FileNotFoundException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -17,7 +18,6 @@ import static iaf.course.finalex.routes.Routes.*;
 public class Client 
 {
 
-	private static final RttRecorder RECORDER = new RttRecorder();
 	private static final Logger LOG = LogManager.getLogger(Client.class);
 
 	private static final class BootstrapData {
@@ -41,7 +41,7 @@ public class Client
 		}
 	}
 	
-	public static void main(String[] args) {
+	public static void main(String[] args) throws FileNotFoundException {
 		if (args.length < 3) {
 			System.out.println("Usage:  Client.jar <json_source_directory> <hostname> <port>");
 		}
@@ -53,10 +53,11 @@ public class Client
 		final FileSystem fs = vertx.fileSystem();
 		final RecordHttpSender sender = new RecordHttpSender(client);
 		final ExecutorService ex = Executors.newSingleThreadExecutor();
+		final RttRecorder recorder = new RttRecorder(data.directory + "\\histogram");
 		
-		ex.submit(RECORDER);
+		ex.submit(recorder);
 		final WorkerExecutor executor = vertx.createSharedWorkerExecutor("send-data-pool", 1);
-		
+
 		LOG.info("Reading directory {}", data.directory);
 		fs.readDir(data.directory, resultOfFiles -> {
 			if (resultOfFiles.succeeded()) {
@@ -71,7 +72,7 @@ public class Client
 								try {
 									sender.send(json, data.port, data.hostname, ADD_PERSON_URL, 5000);
 									final long then = System.currentTimeMillis();
-									RECORDER.recordRtt(then - now);
+									recorder.recordRtt(then - now);
 								} catch (Exception e) {
 									LOG.error("Failed executing send!", e);
 								}

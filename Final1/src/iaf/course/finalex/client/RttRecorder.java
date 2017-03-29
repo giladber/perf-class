@@ -1,6 +1,9 @@
 package iaf.course.finalex.client;
 
+import java.io.FileNotFoundException;
+
 import org.HdrHistogram.Histogram;
+import org.HdrHistogram.HistogramLogProcessor;
 import org.HdrHistogram.HistogramLogWriter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -13,8 +16,13 @@ public class RttRecorder implements Runnable, AutoCloseable
 	private static final Logger LOG = LogManager.getLogger(RttRecorder.class);
 	
 	private final Histogram histogram = new Histogram(1L, MAX_TRACKABLE_LATENCY_MS, 5);
-	private final HistogramLogWriter writer = new HistogramLogWriter(System.out);
+	private final HistogramLogWriter writer;
 	private volatile boolean stop = false;
+	
+	public RttRecorder(String outputFile) throws FileNotFoundException
+	{
+		this.writer = new HistogramLogWriter(outputFile);
+	}
 	
 	
 	public void recordRtt(long ms) {

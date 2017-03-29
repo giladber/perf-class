@@ -13,9 +13,10 @@ public class GenerateData {
 			
 			if (!createdDirectories && !(targetFolder.isDirectory() && targetFolder.exists())) {
 				System.out.println("Failed to create directory at " + targetFolder);
+			} else {
+				new ToJson().execute(targetFolder);
 			}
 
-			new ToJson().execute(targetFolder);
 		} else {
 			System.out.println("Usage: GenerateData <target_folder>");
 		}
